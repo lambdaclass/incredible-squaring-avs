@@ -9,7 +9,7 @@ import {IStrategy} from "eigenlayer-contracts/src/contracts/interfaces/IStrategy
 import {Vm} from "forge-std/Vm.sol";
 import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {IncredibleSquaringServiceManager} from "../../src/IncredibleSquaringServiceManager.sol";
+import {IncredibleSortingServiceManager} from "../../src/IncredibleSortingServiceManager.sol";
 
 library SetupPaymentsLib {
     Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -105,7 +105,7 @@ library SetupPaymentsLib {
 
             operatorDirectedRewardsSubmissions[i] = rewardSubmission;
         }
-        IncredibleSquaringServiceManager(avs).createOperatorDirectedAVSRewardsSubmission(
+        IncredibleSortingServiceManager(avs).createOperatorDirectedAVSRewardsSubmission(
             operatorDirectedRewardsSubmissions
         );
     }

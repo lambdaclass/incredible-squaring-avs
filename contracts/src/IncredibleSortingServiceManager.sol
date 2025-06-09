@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "@eigenlayer/contracts/libraries/BytesLib.sol";
-import "./IIncredibleSquaringTaskManager.sol";
+import "./IIncredibleSortingTaskManager.sol";
 import "@eigenlayer-middleware/src/ServiceManagerBase.sol";
 import {
     IAllocationManager,
@@ -17,16 +17,16 @@ import {ISlashingRegistryCoordinator} from
  * @title Primary entrypoint for procuring services from IncredibleSquaring.
  * @author Layr Labs, Inc.
  */
-contract IncredibleSquaringServiceManager is ServiceManagerBase {
+contract IncredibleSortingServiceManager is ServiceManagerBase {
     using BytesLib for bytes;
 
-    IIncredibleSquaringTaskManager public immutable incredibleSquaringTaskManager;
+    IIncredibleSortingTaskManager public immutable incredibleSortingTaskManager;
 
     /// @notice when applied to a function, ensures that the function is only callable by the `registryCoordinator`.
-    modifier onlyIncredibleSquaringTaskManager() {
+    modifier onlyIncredibleSortingTaskManager() {
         require(
-            msg.sender == address(incredibleSquaringTaskManager),
-            "onlyIncredibleSquaringTaskManager: not from credible squaring task manager"
+            msg.sender == address(incredibleSortingTaskManager),
+            "onlyIncredibleSortingTaskManager: not from credible squaring task manager"
         );
         _;
     }
@@ -38,7 +38,7 @@ contract IncredibleSquaringServiceManager is ServiceManagerBase {
         address rewards_coordinator,
         IAllocationManager allocationManager,
         IPermissionController _permissionController,
-        IIncredibleSquaringTaskManager _incredibleSquaringTaskManager
+        IIncredibleSortingTaskManager _incredibleSortingTaskManager
     )
         ServiceManagerBase(
             _avsDirectory,
@@ -49,7 +49,7 @@ contract IncredibleSquaringServiceManager is ServiceManagerBase {
             allocationManager
         )
     {
-        incredibleSquaringTaskManager = _incredibleSquaringTaskManager;
+        incredibleSortingTaskManager = _incredibleSortingTaskManager;
     }
 
     function initialize(address initialOwner, address rewardsInitiator) external initializer {

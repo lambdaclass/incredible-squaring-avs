@@ -13,10 +13,10 @@ import (
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/utils"
 
-	sdkcommon "github.com/Layr-Labs/incredible-squaring-avs/common"
-	cstaskmanager "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/IncredibleSquaringTaskManager"
-	erc20mock "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/MockERC20"
-	"github.com/Layr-Labs/incredible-squaring-avs/operator"
+	sdkcommon "github.com/Layr-Labs/incredible-sorting-avs/common"
+	cstaskmanager "github.com/Layr-Labs/incredible-sorting-avs/contracts/bindings/IncredibleSortingTaskManager"
+	erc20mock "github.com/Layr-Labs/incredible-sorting-avs/contracts/bindings/MockERC20"
+	"github.com/Layr-Labs/incredible-sorting-avs/operator"
 )
 
 type AvsReaderer interface {

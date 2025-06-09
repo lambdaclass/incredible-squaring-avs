@@ -147,13 +147,13 @@ contract SetupDistributions is Script, Test {
     ) public {
         MockERC20(incredibleSquaringDeployment.token).mint(deployer, amountPerPayment * numPayments);
         MockERC20(incredibleSquaringDeployment.token).increaseAllowance(
-            incredibleSquaringDeployment.incredibleSquaringServiceManager,
+            incredibleSquaringDeployment.incredibleSortingServiceManager,
             amountPerPayment * numPayments
         );
         uint32 duration = rewardsCoordinator.MAX_REWARDS_DURATION();
 
         SetupDistributionsLib.createAVSRewardsSubmissions(
-            incredibleSquaringDeployment.incredibleSquaringServiceManager,
+            incredibleSquaringDeployment.incredibleSortingServiceManager,
             incredibleSquaringDeployment.strategy,
             numPayments,
             amountPerPayment,
@@ -170,7 +170,7 @@ contract SetupDistributions is Script, Test {
     ) public {
         MockERC20(incredibleSquaringDeployment.token).mint(deployer, amountPerPayment * numPayments);
         MockERC20(incredibleSquaringDeployment.token).increaseAllowance(
-            incredibleSquaringDeployment.incredibleSquaringServiceManager,
+            incredibleSquaringDeployment.incredibleSortingServiceManager,
             amountPerPayment * numPayments
         );
         address[] memory operators = new address[](2);
@@ -178,7 +178,7 @@ contract SetupDistributions is Script, Test {
         operators[1] = operator2;
 
         SetupDistributionsLib.createOperatorDirectedAVSRewardsSubmissions(
-            incredibleSquaringDeployment.incredibleSquaringServiceManager,
+            incredibleSquaringDeployment.incredibleSortingServiceManager,
             operators,
             incredibleSquaringDeployment.strategy,
             numPayments,

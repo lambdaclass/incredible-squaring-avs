@@ -11,9 +11,9 @@ import {ISlashingRegistryCoordinatorTypes} from
 import {IStakeRegistryTypes} from "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
 import {IStrategy} from "@eigenlayer/contracts/interfaces/IStrategyManager.sol";
 import {
-    IncredibleSquaringServiceManager,
+    IncredibleSortingServiceManager,
     IServiceManager
-} from "../src/IncredibleSquaringServiceManager.sol";
+} from "../src/IncredibleSortingServiceManager.sol";
 import {CoreDeploymentLib} from "./utils/CoreDeploymentLib.sol";
 import {
     AllocationManager,
@@ -40,7 +40,7 @@ contract ModifyAllocations is Script {
     function run() external {
         vm.startBroadcast(deployer);
         IServiceManager serviceManager =
-            IServiceManager(deploymentData.incredibleSquaringServiceManager);
+            IServiceManager(deploymentData.incredibleSortingServiceManager);
         IAllocationManager _allocationManager = IAllocationManager(coreData.allocationManager);
 
         OperatorSet memory operatorSet = OperatorSet({avs: address(serviceManager), id: 0});

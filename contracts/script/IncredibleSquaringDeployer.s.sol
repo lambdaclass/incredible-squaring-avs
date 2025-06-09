@@ -24,11 +24,11 @@ import {StakeRegistry} from "@eigenlayer-middleware/src/StakeRegistry.sol";
 import "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
 
 import {
-    IncredibleSquaringServiceManager,
+    IncredibleSortingServiceManager,
     IServiceManager
-} from "../src/IncredibleSquaringServiceManager.sol";
-import {IncredibleSquaringTaskManager} from "../src/IncredibleSquaringTaskManager.sol";
-import {IIncredibleSquaringTaskManager} from "../src/IIncredibleSquaringTaskManager.sol";
+} from "../src/IncredibleSortingServiceManager.sol";
+import {IncredibleSortingTaskManager} from "../src/IncredibleSortingTaskManager.sol";
+import {IIncredibleSortingTaskManager} from "../src/IIncredibleSortingTaskManager.sol";
 import "../src/MockERC20.sol";
 
 import "forge-std/Test.sol";
@@ -78,11 +78,11 @@ contract IncredibleSquaringDeployer is Script {
 
     OperatorStateRetriever public operatorStateRetriever;
 
-    IncredibleSquaringServiceManager public incredibleSquaringServiceManager;
-    IServiceManager public incredibleSquaringServiceManagerImplementation;
+    IncredibleSortingServiceManager public incredibleSortingServiceManager;
+    IServiceManager public incredibleSortingServiceManagerImplementation;
 
-    IncredibleSquaringTaskManager public incredibleSquaringTaskManager;
-    IIncredibleSquaringTaskManager public incredibleSquaringTaskManagerImplementation;
+    IncredibleSortingTaskManager public incredibleSortingTaskManager;
+    IIncredibleSortingTaskManager public incredibleSortingTaskManagerImplementation;
     CoreDeploymentLib.DeploymentData internal configData;
     IStrategy incredibleSquaringStrategy;
     address private deployer;
@@ -126,7 +126,7 @@ contract IncredibleSquaringDeployer is Script {
         console.log("instantSlasher", incredibleSquaringDeployment.slasher);
 
         FundOperator.fund_operator(
-            address(erc20Mock), incredibleSquaringDeployment.incredibleSquaringServiceManager, 1e18
+            address(erc20Mock), incredibleSquaringDeployment.incredibleSortingServiceManager, 1e18
         );
         incredibleSquaringDeployment.token = address(erc20Mock);
 

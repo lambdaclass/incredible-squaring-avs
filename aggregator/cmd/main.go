@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/big"
 	"os"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -16,10 +15,10 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	taskmanager "github.com/Layr-Labs/eigensdk-go/task-manager"
-	"github.com/Layr-Labs/incredible-squaring-avs/aggregator"
-	commonincredible "github.com/Layr-Labs/incredible-squaring-avs/common"
-	cstaskmanager "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/IncredibleSquaringTaskManager"
-	"github.com/Layr-Labs/incredible-squaring-avs/core/config"
+	"github.com/Layr-Labs/incredible-sorting-avs/aggregator"
+	commonincredible "github.com/Layr-Labs/incredible-sorting-avs/common"
+	cstaskmanager "github.com/Layr-Labs/incredible-sorting-avs/contracts/bindings/IncredibleSortingTaskManager"
+	"github.com/Layr-Labs/incredible-sorting-avs/core/config"
 )
 
 var (
@@ -61,7 +60,7 @@ func aggregatorMain(ctx *cli.Context) error {
 	aggConfig := &aggregator.Config{}
 	err = commonincredible.ReadTomlConfig(configFilePath, aggConfig)
 
-	taskManagerAbi, err := cstaskmanager.ContractIncredibleSquaringTaskManagerMetaData.GetAbi()
+	taskManagerAbi, err := cstaskmanager.ContractIncredibleSortingTaskManagerMetaData.GetAbi()
 	if err != nil {
 		logger.Fatalf(err.Error())
 	}
@@ -83,7 +82,7 @@ func aggregatorMain(ctx *cli.Context) error {
 
 	txMgr, err := txmgr.NewSimpleTxManagerFromPrivateKey(logger, ethRpcClient, ecdsaPrivateKey)
 
-	taskResponder, err := taskmanager.NewTaskManagerFromAbi[*big.Int, *big.Int](
+	taskResponder, err := taskmanager.NewTaskManagerFromAbi[[]uint32, []uint32](
 		common.HexToAddress(aggConfig.TaskManagerAddress),
 		taskManagerAbi,
 		txMgr,

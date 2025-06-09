@@ -11,9 +11,9 @@ import {ISlashingRegistryCoordinatorTypes} from
 import {IStakeRegistryTypes} from "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
 import {IStrategy} from "@eigenlayer/contracts/interfaces/IStrategyManager.sol";
 import {
-    IncredibleSquaringServiceManager,
+    IncredibleSortingServiceManager,
     IServiceManager
-} from "../src/IncredibleSquaringServiceManager.sol";
+} from "../src/IncredibleSortingServiceManager.sol";
 import {CoreDeploymentLib} from "./utils/CoreDeploymentLib.sol";
 import {
     AllocationManager, IAllocationManager
@@ -37,14 +37,14 @@ contract UAMPermissions is Script {
     function run() external {
         vm.startBroadcast(deployer);
         IServiceManager serviceManager =
-            IServiceManager(deploymentData.incredibleSquaringServiceManager);
+            IServiceManager(deploymentData.incredibleSortingServiceManager);
         serviceManager.setAppointee(
             deployer, coreData.allocationManager, AllocationManager.setAVSRegistrar.selector
         );
 
         IAllocationManager _allocationManager = IAllocationManager(coreData.allocationManager);
         _allocationManager.setAVSRegistrar(
-            deploymentData.incredibleSquaringServiceManager,
+            deploymentData.incredibleSortingServiceManager,
             IAVSRegistrar(deploymentData.slashingRegistryCoordinator)
         );
 
@@ -66,7 +66,7 @@ contract UAMPermissions is Script {
         );
 
         _allocationManager.updateAVSMetadataURI(
-            deploymentData.incredibleSquaringServiceManager, "metadataURI"
+            deploymentData.incredibleSortingServiceManager, "metadataURI"
         );
 
         vm.stopBroadcast();

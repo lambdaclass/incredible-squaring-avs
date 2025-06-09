@@ -18,11 +18,11 @@ import {SlashingRegistryCoordinator} from
     "@eigenlayer-middleware/src/SlashingRegistryCoordinator.sol";
 import {IPermissionController} from "@eigenlayer/contracts/interfaces/IPermissionController.sol";
 import {
-    IncredibleSquaringServiceManager,
+    IncredibleSortingServiceManager,
     IServiceManager,
-    IIncredibleSquaringTaskManager
-} from "../../src/IncredibleSquaringServiceManager.sol";
-import {IncredibleSquaringTaskManager} from "../../src/IncredibleSquaringTaskManager.sol";
+    IIncredibleSortingTaskManager
+} from "../../src/IncredibleSortingServiceManager.sol";
+import {IncredibleSortingTaskManager} from "../../src/IncredibleSortingTaskManager.sol";
 import {IDelegationManager} from "@eigenlayer/contracts/interfaces/IDelegationManager.sol";
 // import {Quorum} from "@eigenlayer-middleware/src/interfaces/IECDSAStakeRegistryEventsAndErrors.sol";
 import {UpgradeableProxyLib} from "./UpgradeableProxyLib.sol";
@@ -60,8 +60,8 @@ library IncredibleSquaringDeploymentLib {
     string internal constant MIDDLEWARE_VERSION = "v1.4.0-testnet-holesky";
 
     struct DeploymentData {
-        address incredibleSquaringServiceManager;
-        address incredibleSquaringTaskManager;
+        address incredibleSortingServiceManager;
+        address incredibleSortingTaskManager;
         address slashingRegistryCoordinator;
         address operatorStateRetriever;
         address blsapkRegistry;
@@ -104,9 +104,9 @@ library IncredibleSquaringDeploymentLib {
 
         // First, deploy upgradeable proxy contracts that will point to the implementations.
         OperatorStateRetriever operatorStateRetriever = new OperatorStateRetriever();
-        result.incredibleSquaringServiceManager = UpgradeableProxyLib.setUpEmptyProxy(proxyAdmin);
+        result.incredibleSortingServiceManager = UpgradeableProxyLib.setUpEmptyProxy(proxyAdmin);
         result.stakeRegistry = UpgradeableProxyLib.setUpEmptyProxy(proxyAdmin);
-        result.incredibleSquaringTaskManager = UpgradeableProxyLib.setUpEmptyProxy(proxyAdmin);
+        result.incredibleSortingTaskManager = UpgradeableProxyLib.setUpEmptyProxy(proxyAdmin);
         result.slashingRegistryCoordinator = UpgradeableProxyLib.setUpEmptyProxy(proxyAdmin);
         result.blsapkRegistry = UpgradeableProxyLib.setUpEmptyProxy(proxyAdmin);
         result.indexRegistry = UpgradeableProxyLib.setUpEmptyProxy(proxyAdmin);
@@ -134,13 +134,13 @@ library IncredibleSquaringDeploymentLib {
             new InstantSlasher(
                 IAllocationManager(core.allocationManager),
                 ISlashingRegistryCoordinator(result.slashingRegistryCoordinator),
-                result.incredibleSquaringTaskManager
+                result.incredibleSortingTaskManager
             )
         );
         console2.log("pauser_registry");
         console2.log(coredata.pauserRegistry);
         console2.log("service_manager");
-        console2.log(result.incredibleSquaringServiceManager);
+        console2.log(result.incredibleSortingServiceManager);
         console2.log("stake_registry");
         console2.log(result.stakeRegistry);
         console2.log("bls_apk_registry");
@@ -154,7 +154,7 @@ library IncredibleSquaringDeploymentLib {
         console2.log("operator_state_retriever");
         console2.log(result.operatorStateRetriever);
         console2.log("task_manager");
-        console2.log(result.incredibleSquaringTaskManager);
+        console2.log(result.incredibleSortingTaskManager);
 
         address slashingRegistryCoordinatorImpl = address(
             new SlashingRegistryCoordinator(
@@ -212,7 +212,7 @@ library IncredibleSquaringDeploymentLib {
         look_ahead_period[0] = 0;
         bytes memory upgradeCall = abi.encodeCall(
             SlashingRegistryCoordinator.initialize,
-            (admin, admin, admin, 0, result.incredibleSquaringServiceManager)
+            (admin, admin, admin, 0, result.incredibleSortingServiceManager)
         );
 
         UpgradeableProxyLib.upgrade(result.stakeRegistry, stakeRegistryImpl);
@@ -223,44 +223,44 @@ library IncredibleSquaringDeploymentLib {
         );
         console2.log("allocation_manager");
         console2.log(core.allocationManager);
-        IncredibleSquaringServiceManager incredibleSquaringServiceManagerImpl = new IncredibleSquaringServiceManager(
+        IncredibleSortingServiceManager incredibleSortingServiceManagerImpl = new IncredibleSortingServiceManager(
             (IAVSDirectory(avsdirectory)),
             ISlashingRegistryCoordinator(result.slashingRegistryCoordinator),
             IStakeRegistry(result.stakeRegistry),
             core.rewardsCoordinator,
             IAllocationManager(core.allocationManager),
             IPermissionController(core.permissionController),
-            IIncredibleSquaringTaskManager(result.incredibleSquaringTaskManager)
+            IIncredibleSortingTaskManager(result.incredibleSortingTaskManager)
         );
         console2.log("allocation_manager");
         console2.log(core.allocationManager);
-        IncredibleSquaringTaskManager incredibleSquaringTaskManagerImpl = new IncredibleSquaringTaskManager(
+        IncredibleSortingTaskManager incredibleSortingTaskManagerImpl = new IncredibleSortingTaskManager(
             ISlashingRegistryCoordinator(result.slashingRegistryCoordinator),
             IPauserRegistry(address(pausercontract)),
             30
         );
         bytes memory servicemanagerupgradecall =
-            abi.encodeCall(IncredibleSquaringServiceManager.initialize, (admin, admin));
+            abi.encodeCall(IncredibleSortingServiceManager.initialize, (admin, admin));
         UpgradeableProxyLib.upgradeAndCall(
-            result.incredibleSquaringServiceManager,
-            address(incredibleSquaringServiceManagerImpl),
+            result.incredibleSortingServiceManager,
+            address(incredibleSortingServiceManagerImpl),
             servicemanagerupgradecall
         );
 
         bytes memory taskmanagerupgradecall = abi.encodeCall(
-            IncredibleSquaringTaskManager.initialize,
+            IncredibleSortingTaskManager.initialize,
             (
                 admin,
                 isConfig.aggregator_addr,
                 isConfig.task_generator_addr,
                 core.allocationManager,
                 result.slasher,
-                result.incredibleSquaringServiceManager
+                result.incredibleSortingServiceManager
             )
         );
         UpgradeableProxyLib.upgradeAndCall(
-            result.incredibleSquaringTaskManager,
-            address(incredibleSquaringTaskManagerImpl),
+            result.incredibleSortingTaskManager,
+            address(incredibleSortingTaskManagerImpl),
             (taskmanagerupgradecall)
         );
 
@@ -315,10 +315,10 @@ library IncredibleSquaringDeploymentLib {
         string memory json = vm.readFile(fileName);
 
         DeploymentData memory data;
-        data.incredibleSquaringServiceManager =
-            json.readAddress(".addresses.incredibleSquaringServiceManager");
-        data.incredibleSquaringTaskManager =
-            json.readAddress(".addresses.incredibleSquaringTaskManager");
+        data.incredibleSortingServiceManager =
+            json.readAddress(".addresses.incredibleSortingServiceManager");
+        data.incredibleSortingTaskManager =
+            json.readAddress(".addresses.incredibleSortingTaskManager");
         data.slashingRegistryCoordinator = json.readAddress(".addresses.registryCoordinator");
         data.operatorStateRetriever = json.readAddress(".addresses.operatorStateRetriever");
         data.stakeRegistry = json.readAddress(".addresses.stakeRegistry");
@@ -342,7 +342,7 @@ library IncredibleSquaringDeploymentLib {
         DeploymentData memory data
     ) internal {
         address proxyAdmin =
-            address(UpgradeableProxyLib.getProxyAdmin(data.incredibleSquaringServiceManager));
+            address(UpgradeableProxyLib.getProxyAdmin(data.incredibleSortingServiceManager));
 
         string memory deploymentData = _generateDeploymentJson(data, proxyAdmin);
 
@@ -377,12 +377,12 @@ library IncredibleSquaringDeploymentLib {
         return string.concat(
             '{"proxyAdmin":"',
             proxyAdmin.toHexString(),
-            '","incredibleSquaringServiceManager":"',
-            data.incredibleSquaringServiceManager.toHexString(),
-            '","incredibleSquaringServiceManagerImpl":"',
-            data.incredibleSquaringServiceManager.getImplementation().toHexString(),
-            '","incredibleSquaringTaskManager":"',
-            data.incredibleSquaringTaskManager.toHexString(),
+            '","incredibleSortingServiceManager":"',
+            data.incredibleSortingServiceManager.toHexString(),
+            '","incredibleSortingServiceManagerImpl":"',
+            data.incredibleSortingServiceManager.getImplementation().toHexString(),
+            '","incredibleSortingTaskManager":"',
+            data.incredibleSortingTaskManager.toHexString(),
             '","registryCoordinator":"',
             data.slashingRegistryCoordinator.toHexString(),
             '","blsapkRegistry":"',

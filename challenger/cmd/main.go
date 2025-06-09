@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/big"
 	"os"
+	"slices"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -15,12 +15,12 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	sdkchallenger "github.com/Layr-Labs/eigensdk-go/challenger"
 	"github.com/Layr-Labs/eigensdk-go/logging"
+	sdkoperator "github.com/Layr-Labs/eigensdk-go/operator"
 	taskmanager "github.com/Layr-Labs/eigensdk-go/task-manager"
-	"github.com/Layr-Labs/eigensdk-go/utils"
-	"github.com/Layr-Labs/incredible-squaring-avs/challenger"
-	commonincredible "github.com/Layr-Labs/incredible-squaring-avs/common"
-	cstaskmanager "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/IncredibleSquaringTaskManager"
-	"github.com/Layr-Labs/incredible-squaring-avs/core/config"
+	"github.com/Layr-Labs/incredible-sorting-avs/challenger"
+	commonincredible "github.com/Layr-Labs/incredible-sorting-avs/common"
+	cstaskmanager "github.com/Layr-Labs/incredible-sorting-avs/contracts/bindings/IncredibleSortingTaskManager"
+	"github.com/Layr-Labs/incredible-sorting-avs/core/config"
 )
 
 var (
@@ -60,7 +60,7 @@ func challengerMain(ctx *cli.Context) error {
 
 	ethRpcClient, err := ethclient.Dial(challengerConfig.EthHttpUrl)
 
-	taskManagerAbi, err := cstaskmanager.ContractIncredibleSquaringTaskManagerMetaData.GetAbi()
+	taskManagerAbi, err := cstaskmanager.ContractIncredibleSortingTaskManagerMetaData.GetAbi()
 	if err != nil {
 		logger.Fatalf(err.Error())
 	}
@@ -78,13 +78,21 @@ func challengerMain(ctx *cli.Context) error {
 
 	txMgr, err := txmgr.NewSimpleTxManagerFromPrivateKey(logger, ethRpcClient, ecdsaPrivateKey)
 
+	cfg := sdkchallenger.Config{
+		EthWsUrl:   challengerConfig.EthWsUrl,
+		EthHttpUrl: challengerConfig.EthHttpUrl,
+	}
+
 	taskManagerAddr := challengerConfig.TaskManagerAddress
-	challengerRaiser, err := taskmanager.NewTaskManagerFromAbi[*big.Int, *big.Int](
+	challengerRaiser, err := taskmanager.NewTaskManagerFromAbi[[]uint32, []uint32](
 		common.HexToAddress(taskManagerAddr),
 		taskManagerAbi,
 		txMgr,
 		ethRpcClient,
 	)
+
+	calculator := sdkoperator.NewFunctionResponseCalculator(SortNumbers)
+	squareValidation := sdkchallenger.ResponseValidationFunctionFromResponseCalculator(calculator, slices.Equal)
 
 	indexingChallengerProcessor, err := sdkchallenger.NewIndexingProcessor(
 		logger,
@@ -94,7 +102,7 @@ func challengerMain(ctx *cli.Context) error {
 
 	challenger, err := sdkchallenger.NewChallenger(
 		logger,
-		challengerConfig.Config,
+		cfg,
 		taskManagerAbi,
 		indexingChallengerProcessor,
 	)
@@ -111,17 +119,10 @@ func challengerMain(ctx *cli.Context) error {
 
 }
 
-func square(taskIndex uint32, numberToSquare *big.Int) (*big.Int, error) {
-	numberSquared := big.NewInt(0).Exp(numberToSquare, big.NewInt(2), nil)
+func SortNumbers(taskIndex uint32, numbersToBeSorted []uint32) ([]uint32, error) {
+	sorted := make([]uint32, len(numbersToBeSorted))
+	copy(sorted, numbersToBeSorted)
 
-	return numberSquared, nil
-}
-
-func squareValidation(taskIndex uint32, numberToSquare *big.Int, numberSquared *big.Int) (bool, error) {
-	result, err := square(taskIndex, numberToSquare)
-	if err != nil {
-		return false, utils.WrapError("failed to calculate square", err)
-	}
-
-	return result.Cmp(numberSquared) == 0, nil
+	slices.Sort(sorted)
+	return sorted, nil
 }

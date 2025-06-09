@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"log"
-	"math/big"
 	"os"
+	"slices"
 
 	"github.com/urfave/cli"
 
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	sdkoperator "github.com/Layr-Labs/eigensdk-go/operator"
-	commonincredible "github.com/Layr-Labs/incredible-squaring-avs/common"
-	cstaskmanager "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/IncredibleSquaringTaskManager"
-	"github.com/Layr-Labs/incredible-squaring-avs/core/config"
-	"github.com/Layr-Labs/incredible-squaring-avs/operator"
+	commonincredible "github.com/Layr-Labs/incredible-sorting-avs/common"
+	cstaskmanager "github.com/Layr-Labs/incredible-sorting-avs/contracts/bindings/IncredibleSortingTaskManager"
+	"github.com/Layr-Labs/incredible-sorting-avs/core/config"
+	"github.com/Layr-Labs/incredible-sorting-avs/operator"
 )
 
 func main() {
@@ -47,16 +47,16 @@ func operatorMain(ctx *cli.Context) error {
 
 	logger.Info("initializing operator")
 
-	taskManagerAbi, err := cstaskmanager.ContractIncredibleSquaringTaskManagerMetaData.GetAbi()
+	taskManagerAbi, err := cstaskmanager.ContractIncredibleSortingTaskManagerMetaData.GetAbi()
 	if err != nil {
 		logger.Fatalf(err.Error())
 	}
 
 	operatorConfig := opConfig.Config
 
-	calculator := sdkoperator.NewFunctionResponseCalculator(square)
+	calculator := sdkoperator.NewFunctionResponseCalculator(SortNumbers)
 
-	failingFunction, err := sdkoperator.NewFailingResponseCalculator(calculator, 10, big.NewInt(0))
+	failingFunction, err := sdkoperator.NewFailingResponseCalculator(calculator, 10, []uint32{})
 	if err != nil {
 		logger.Fatalf(err.Error())
 	}
@@ -88,9 +88,10 @@ func operatorMain(ctx *cli.Context) error {
 
 }
 
-// This function computes the square of a number
-func square(taskIndex uint32, numberToSquare *big.Int) (*big.Int, error) {
-	numberSquared := big.NewInt(0).Exp(numberToSquare, big.NewInt(2), nil)
+func SortNumbers(taskIndex uint32, numbersToBeSorted []uint32) ([]uint32, error) {
+	sorted := make([]uint32, len(numbersToBeSorted))
+	copy(sorted, numbersToBeSorted)
 
-	return numberSquared, nil
+	slices.Sort(sorted)
+	return sorted, nil
 }

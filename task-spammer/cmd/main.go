@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"iter"
 	"log"
-	"math/big"
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -17,12 +18,12 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	taskmanager "github.com/Layr-Labs/eigensdk-go/task-manager"
 	sdktaskspammer "github.com/Layr-Labs/eigensdk-go/task-spammer"
-	cstaskmanager "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/IncredibleSquaringTaskManager"
-	taskspammer "github.com/Layr-Labs/incredible-squaring-avs/task-spammer"
+	cstaskmanager "github.com/Layr-Labs/incredible-sorting-avs/contracts/bindings/IncredibleSortingTaskManager"
+	taskspammer "github.com/Layr-Labs/incredible-sorting-avs/task-spammer"
 
-	"github.com/Layr-Labs/incredible-squaring-avs/core/config"
+	"github.com/Layr-Labs/incredible-sorting-avs/core/config"
 
-	commonincredible "github.com/Layr-Labs/incredible-squaring-avs/common"
+	commonincredible "github.com/Layr-Labs/incredible-sorting-avs/common"
 )
 
 var (
@@ -76,20 +77,26 @@ func taskSpammerMain(ctx *cli.Context) error {
 
 	txMgr, err := txmgr.NewSimpleTxManagerFromPrivateKey(logger, ethRpcClient, ecdsaPrivateKey)
 
-	taskManagerAbi, err := cstaskmanager.ContractIncredibleSquaringTaskManagerMetaData.GetAbi()
+	taskManagerAbi, err := cstaskmanager.ContractIncredibleSortingTaskManagerMetaData.GetAbi()
 	if err != nil {
 		logger.Fatalf(err.Error())
 	}
 
 	taskManagerAddr := common.HexToAddress(tsConfig.TaskManagerAddress)
-	taskCreator, err := taskmanager.NewTaskManagerFromAbi[*big.Int, *big.Int](taskManagerAddr, taskManagerAbi, txMgr, ethRpcClient)
+	taskCreator, err := taskmanager.NewTaskManagerFromAbi[[]uint32, []uint32](taskManagerAddr, taskManagerAbi, txMgr, ethRpcClient)
 	if err != nil {
 		logger.Fatalf(err.Error())
 	}
 
-	seq := NewNumberToSquareSequence()
+	taskSpammerCfg := sdktaskspammer.Config{
+		TimeBetweenTasks:          10 * time.Second,
+		QuorumThresholdPercentage: uint32(100),
+		QuorumNumbers:             []uint8{0},
+	}
 
-	taskSpammer, err := sdktaskspammer.NewTaskSpammer(logger, tsConfig.Config, taskCreator, seq)
+	seq := NewRandomU32Sequence()
+
+	taskSpammer, err := sdktaskspammer.NewTaskSpammer(logger, taskSpammerCfg, taskCreator, seq)
 	if err != nil {
 		logger.Fatalf("Failed to create task spammer: %s", err.Error())
 	}
@@ -103,17 +110,20 @@ func taskSpammerMain(ctx *cli.Context) error {
 
 }
 
-// Returns an iterator for the sequence 1, 2, 3, ...
-func NewNumberToSquareSequence() iter.Seq[*big.Int] {
-	acc := big.NewInt(1)
-	delta := big.NewInt(1)
-	return func(yield func(*big.Int) bool) {
+func NewRandomU32Sequence() iter.Seq[[]uint32] {
+	source := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(source)
+
+	return func(yield func([]uint32) bool) {
 		for {
-			if !yield(acc) {
+			length := rand.Intn(21) + 10
+			vec := make([]uint32, length)
+			for i := range vec {
+				vec[i] = rand.Uint32()
+			}
+			if !yield(vec) {
 				break
 			}
-			acc.Add(acc, delta)
 		}
 	}
-
 }
